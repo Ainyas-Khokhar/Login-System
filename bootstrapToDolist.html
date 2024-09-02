@@ -1,0 +1,303 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <!-- Bootstrap CSS -->
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css" rel="stylesheet">
+
+
+</head>
+<body>
+    
+
+  
+
+
+  <!-- ==================================================================================================================== -->
+
+
+
+
+
+
+
+
+
+
+
+
+  <!-- ==================================================================================================================== -->
+
+
+
+
+
+
+<!-- Button trigger modal -->
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop1">
+    To-Do List
+</button>
+
+<!-- Modal -->
+<div class="modal fade modal-lg" id="staticBackdrop1" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="staticBackdropLabel">
+                    My Tasks
+                    <i class="bi bi-plus-circle ms-3" id="addRowIcon" style="cursor: pointer;"></i>
+                </h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-1 border-end list-header-row ">userID</div>
+                        <div class="col-1 border-end list-header-row ">TaskID</div>
+                        <div class="col-3 border-end list-header-row ">Title</div>
+                        <div class="col-4 border-end list-header-row ">Description</div>
+                        <div class="col-2 border-end list-header-row ">Status</div>
+                        <div class="col-1 list-header-row ">Actions</div>
+                    </div>
+                    <hr class="my-2">
+                </div>
+
+                <div id="taskRowsContainer" class="container">
+                    <!-- Example row (populate with server-side script) -->
+                    <div class="row task-row">
+                        <div class="col-1 border-end"><?php echo $_SESSION['user_id']; ?></div>
+                        <div class="col-1 border-end">1</div>
+                        <div class="col-3 border-end">
+                            <div class="task-title-container">
+                                <input type="text" class="form-control task-title-input" placeholder="Enter title" onblur="updateTitle(this)" />
+                                <span class="task-title-display" ondblclick="editTitle(this)"></span>
+                            </div>
+                        </div>
+                        <div class="col-4 border-end">
+                            <div class="task-description-container">
+                                <textarea class="form-control task-description-input" placeholder="Enter description" onblur="updateDescription(this)"></textarea>
+                                <span class="task-description-display" ondblclick="editDescription(this)"></span>
+                            </div>
+                        </div>
+                        <div class="col-2 border-end">
+                            <div class="task-status-container">
+                                <select class="form-select task-status-select" onchange="updateStatus(this)">
+                                    <option value="none" selected>None</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="completed">Completed</option>
+                                </select>
+                                <span class="task-status-badge none" ondblclick="editStatus(this)">None</span>
+                            </div>
+                        </div>
+                        <div class="col-1">
+                            <button class="btn btn-danger btn-sm delete-task" onclick="deleteTask(this)">Delete</button>
+                        </div>
+                        <hr class="my-2">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS -->
+<style>
+
+.list-header-row{
+    font-weight: bold;
+}
+
+    .task-description-input {
+        resize: none;
+        overflow-y: auto;
+        max-height: 100px; /* Adjust height as needed */
+        width: 100%;
+    }
+
+    .task-description-display {
+        display: block;
+        max-height: 100px; /* Adjust height as needed */
+        overflow-y: auto;
+        text-overflow: ellipsis;
+        white-space: pre-wrap;
+    }
+
+    .task-status-badge {
+        display: inline-block;
+        width: 75px; /* Same size as action button */
+        height: 30px;
+        line-height: 30px;
+        text-align: center;
+        border-radius: 5px; /* Square badge */
+        font-size: 0.9rem;
+        color: white;
+        cursor: pointer;
+    }
+
+    .task-status-badge.none {
+        background-color: gray;
+    }
+
+    .task-status-badge.pending {
+        background-color: green;
+    }
+
+    .task-status-badge.completed {
+        background-color: blue;
+    }
+
+    .task-status-select {
+        display: none;
+    }
+
+    .task-title-display,
+    .task-description-display {
+        cursor: pointer;
+    }
+</style>
+
+<!-- Custom JavaScript -->
+<script>
+    document.getElementById('addRowIcon').addEventListener('click', function() {
+        const container = document.getElementById('taskRowsContainer');
+        const existingRows = container.getElementsByClassName('task-row');
+        const rowCount = existingRows.length + 1;
+
+        // Add a new row with a unique TaskID
+        const newRow = document.createElement('div');
+        newRow.className = 'row task-row';
+        newRow.innerHTML = `
+            <div class="col-1 border-end"><?php echo $_SESSION['user_id']; ?></div>
+            <div class="col-1 border-end">${rowCount}</div>
+            <div class="col-3 border-end">
+                <div class="task-title-container">
+                    <input type="text" class="form-control task-title-input" placeholder="Enter title" onblur="updateTitle(this)" />
+                    <span class="task-title-display" ondblclick="editTitle(this)"></span>
+                </div>
+            </div>
+            <div class="col-4 border-end">
+                <div class="task-description-container">
+                    <textarea class="form-control task-description-input" placeholder="Enter description" onblur="updateDescription(this)"></textarea>
+                    <span class="task-description-display" ondblclick="editDescription(this)"></span>
+                </div>
+            </div>
+            <div class="col-2 border-end">
+                <div class="task-status-container">
+                    <select class="form-select task-status-select" onchange="updateStatus(this)">
+                        <option value="none" selected>None</option>
+                        <option value="pending">Pending</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                    <span class="task-status-badge none" ondblclick="editStatus(this)">None</span>
+                </div>
+            </div>
+            <div class="col-1">
+                <button class="btn btn-danger btn-sm delete-task" onclick="deleteTask(this)">Delete</button>
+            </div>
+            <hr class="my-2">
+        `;
+        container.appendChild(newRow);
+    });
+
+    function updateTitle(input) {
+        const display = input.nextElementSibling;
+        display.textContent = input.value || '';
+        input.style.display = 'none';
+        display.style.display = 'inline';
+    }
+
+    function editTitle(span) {
+        const input = span.previousElementSibling;
+        input.style.display = 'inline';
+        span.style.display = 'none';
+        input.focus();
+    }
+
+    function updateDescription(textarea) {
+        const display = textarea.nextElementSibling;
+        display.textContent = textarea.value || 'Click to edit';
+        textarea.style.display = 'none';
+        display.style.display = 'inline';
+    }
+
+    function editDescription(span) {
+        const textarea = span.previousElementSibling;
+        textarea.style.display = 'inline';
+        span.style.display = 'none';
+        textarea.focus();
+    }
+
+    function updateStatus(select) {
+        const badge = select.nextElementSibling;
+        const value = select.options[select.selectedIndex].value;
+        badge.textContent = select.options[select.selectedIndex].text;
+        badge.className = 'task-status-badge ' + value;
+        select.style.display = 'none';
+        badge.style.display = 'inline';
+    }
+
+    function editStatus(span) {
+        const select = span.previousElementSibling;
+        select.style.display = 'inline';
+        span.style.display = 'none';
+        select.focus();
+    }
+
+    function deleteTask(button) {
+        button.closest('.task-row').remove();
+    }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <!-- Bootstrap JS Bundle with Popper -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<!-- Your custom JavaScript -->
+
+
+
+
+
+
+</body>
+</html>
